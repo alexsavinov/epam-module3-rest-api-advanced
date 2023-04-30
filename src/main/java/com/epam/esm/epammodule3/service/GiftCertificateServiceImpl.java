@@ -3,11 +3,12 @@ package com.epam.esm.epammodule3.service;
 import com.epam.esm.epammodule3.exception.GiftCertificateNotFoundException;
 import com.epam.esm.epammodule3.model.dto.CreateGiftCertificateRequest;
 import com.epam.esm.epammodule3.model.dto.CreateTagRequest;
-import com.epam.esm.epammodule3.model.dto.SearchRequest;
+import com.epam.esm.epammodule3.model.dto.SearchGiftCertificateRequest;
 import com.epam.esm.epammodule3.model.dto.UpdateGiftCertificateRequest;
 import com.epam.esm.epammodule3.model.entity.GiftCertificate;
 import com.epam.esm.epammodule3.model.entity.Tag;
 import com.epam.esm.epammodule3.repository.*;
+import com.epam.esm.epammodule3.repository.specification.GiftCertificateSpecification;
 import com.epam.esm.epammodule3.service.mapper.GiftCertificateMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -25,7 +27,6 @@ import java.util.List;
 public class GiftCertificateServiceImpl implements GiftCertificateService {
 
     private final GiftCertificateRepository certificateRepository;
-    private final TagRepository tagRepository;
     private final PageableGiftCertificateRepository pageableCertificateRepository;
     private final TagService tagService;
     private final GiftCertificateMapper certificateMapper;
@@ -34,44 +35,41 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     public GiftCertificate findById(Long id) {
         log.debug("Looking for a gift certificate with id {}", id);
 
-        GiftCertificate certificate = certificateRepository.findById(id)
+        GiftCertificate foundCertificate = certificateRepository.findById(id)
                 .orElseThrow(() -> new GiftCertificateNotFoundException(
                         "Requested resource not found (id = %s)".formatted(id)
                 ));
 
-        List<Tag> tags = tagRepository.findTagsByCertificatesId(id);
-        certificate.setTags(tags);
-
         log.info("Received a gift certificate with id {}", id);
-        return certificate;
+        return foundCertificate;
     }
 
     @Override
     public Page<GiftCertificate> findAll(Pageable pageable) {
         log.debug("Retrieving gift certificates. Page request: {}", pageable);
 
-        Page<GiftCertificate> certificates = pageableCertificateRepository.findAll(pageable);
+        Page<GiftCertificate> foundCertificates = pageableCertificateRepository.findAll(pageable);
 
-        log.info("Retrieved {} gift certificates of {} total", certificates.getSize(), certificates.getTotalElements());
-        return certificates;
+        log.info("Retrieved {} gift certificates of {} total",
+                foundCertificates.getSize(),
+                foundCertificates.getTotalElements());
+
+        return foundCertificates;
     }
 
     @Override
+    @Transactional
     public GiftCertificate create(CreateGiftCertificateRequest createRequest) {
         log.debug("Creating a new certificate");
 
-        GiftCertificate certificate = certificateMapper.toGiftCertificate(createRequest);
-        List<Tag> tags = certificate.getTags();
+        GiftCertificate certificate = certificateMapper.toCertificate(createRequest);
+        List<Tag> foundTags = certificate.getTags();
 
-        if (tags != null) {
-            CreateTagRequest createTagRequest = new CreateTagRequest();
-            for (int i = 0; i < tags.size(); i++) {
-                Tag tag = tags.get(i);
-                createTagRequest.setName(tag.getName());
-                Tag createdTag = tagService.createTagWithCheck(createTagRequest);
-                tag.setId(createdTag.getId());
-            }
-        }
+        Optional.ofNullable(foundTags).ifPresent(certificateTags ->
+                certificateTags.forEach(tag -> {
+                    Tag createdTag = tagService.createTagWithCheck(new CreateTagRequest(tag.getName()));
+                    tag.setId(createdTag.getId());
+                }));
 
         GiftCertificate createdCertificate = certificateRepository.save(certificate);
 
@@ -83,22 +81,15 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Transactional
     public GiftCertificate update(UpdateGiftCertificateRequest updateRequest) {
         log.debug("Updating a gift certificate with id {}", updateRequest.getId());
-        GiftCertificate certificate = findById(updateRequest.getId());
 
-        if (updateRequest.getName() != null) {
-            certificate.setName(updateRequest.getName());
-        }
-        if (updateRequest.getDescription() != null) {
-            certificate.setDescription(updateRequest.getDescription());
-        }
-        if (updateRequest.getPrice() != null) {
-            certificate.setPrice(updateRequest.getPrice());
-        }
-        if (updateRequest.getDuration() != null) {
-            certificate.setDuration(updateRequest.getDuration());
-        }
+        GiftCertificate foundCertificate = findById(updateRequest.getId());
 
-        GiftCertificate updatedCertificate = certificateRepository.save(certificate);
+        Optional.ofNullable(updateRequest.getName()).ifPresent(foundCertificate::setName);
+        Optional.ofNullable(updateRequest.getDescription()).ifPresent(foundCertificate::setDescription);
+        Optional.ofNullable(updateRequest.getPrice()).ifPresent(foundCertificate::setPrice);
+        Optional.ofNullable(updateRequest.getDuration()).ifPresent(foundCertificate::setDuration);
+
+        GiftCertificate updatedCertificate = certificateRepository.save(foundCertificate);
 
         log.info("Updated a gift certificate with id {}", updatedCertificate.getId());
         return updatedCertificate;
@@ -108,22 +99,28 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Transactional
     public void delete(Long id) {
         log.debug("Deleting gift certificate with id {}", id);
-        GiftCertificate certificate = findById(id);
 
-        certificateRepository.delete(certificate);
-        log.info("Gift certificate with id {} is deleted", certificate.getId());
+        GiftCertificate foundCertificate = findById(id);
+
+        certificateRepository.delete(foundCertificate);
+
+        log.info("Gift certificate with id {} is deleted", foundCertificate.getId());
     }
 
     @Override
-    public Page<GiftCertificate> findCertificateWithSearchParams(Pageable pageable, SearchRequest searchRequest) {
+    public Page<GiftCertificate> findCertificateWithSearchParams(
+            Pageable pageable,
+            SearchGiftCertificateRequest searchRequest) {
         log.debug("Looking for a certificates by search params");
 
         Specification<GiftCertificate> specification = new GiftCertificateSpecification(searchRequest);
 
-        Page<GiftCertificate> certificates = pageableCertificateRepository.findAll(specification, pageable);
+        Page<GiftCertificate> foundCertificates = pageableCertificateRepository.findAll(specification, pageable);
 
-        log.info("Retrieved {} gift certificates of {} total", certificates.getSize(), certificates.getTotalElements());
+        log.info("Retrieved {} gift certificates of {} total",
+                foundCertificates.getSize(),
+                foundCertificates.getTotalElements());
 
-        return certificates;
+        return foundCertificates;
     }
 }

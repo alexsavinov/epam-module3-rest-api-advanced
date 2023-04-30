@@ -25,8 +25,8 @@ public class GiftCertificateController {
 
     @GetMapping(value = "/{id}")
     public GiftCertificateDto getCertificateById(@PathVariable Long id) {
-        GiftCertificate certificate = certificateService.findById(id);
-        GiftCertificateDto certificateDto = certificateMapper.toDto(certificate);
+        GiftCertificate foundCertificate = certificateService.findById(id);
+        GiftCertificateDto certificateDto = certificateMapper.toDto(foundCertificate);
 
         certificateDto.add(linkTo(methodOn(GiftCertificateController.class).getCertificateById(certificateDto.getId()))
                 .withSelfRel());
@@ -35,16 +35,16 @@ public class GiftCertificateController {
 
     @GetMapping
     public Page<GiftCertificateDto> getAllCertificates(Pageable pageable) {
-        Page<GiftCertificate> certificates = certificateService.findAll(pageable);
+        Page<GiftCertificate> foundCertificates = certificateService.findAll(pageable);
 
-        return certificates.map(certificateMapper::toDto);
+        return foundCertificates.map(certificateMapper::toDto);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public GiftCertificateDto addCertificate(@RequestBody CreateGiftCertificateRequest createCertificateRequest) {
-        GiftCertificate certificate = certificateService.create(createCertificateRequest);
-        GiftCertificateDto certificateDto = certificateMapper.toDto(certificate);
+        GiftCertificate createdCertificate = certificateService.create(createCertificateRequest);
+        GiftCertificateDto certificateDto = certificateMapper.toDto(createdCertificate);
 
         certificateDto.add(linkTo(methodOn(GiftCertificateController.class).getCertificateById(certificateDto.getId()))
                 .withSelfRel());
@@ -71,17 +71,14 @@ public class GiftCertificateController {
     public Page<GiftCertificateDto> searchCertificatesWithSearchParams(
             @RequestParam(required = false) String name,
             @RequestParam(required = false) String description,
-            @RequestParam(required = false) List<String> tag,
+            @RequestParam(required = false) List<String> tags,
             Pageable pageable) {
 
-        SearchRequest searchRequest = new SearchRequest();
-        searchRequest.setTags(tag);
-        searchRequest.setName(name);
-        searchRequest.setDescription(description);
+        SearchGiftCertificateRequest searchRequest = new SearchGiftCertificateRequest(name, description, tags);
 
-        Page<GiftCertificate> certificates = certificateService
+        Page<GiftCertificate> foundCertificates = certificateService
                 .findCertificateWithSearchParams(pageable, searchRequest);
 
-        return certificates.map(certificateMapper::toDto);
+        return foundCertificates.map(certificateMapper::toDto);
     }
 }

@@ -1,8 +1,6 @@
 package com.epam.esm.epammodule3.controller.advice;
 
-import com.epam.esm.epammodule3.exception.GiftCertificateNotFoundException;
-import com.epam.esm.epammodule3.exception.TagAlreadyExistsException;
-import com.epam.esm.epammodule3.exception.TagNotFoundException;
+import com.epam.esm.epammodule3.exception.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -37,5 +35,29 @@ public class ApplicationControllerAdvice {
         ErrorResponse responseBody = ErrorResponse.of(exception.getMessage(), 40402);
 
         return ResponseEntity.status(NOT_FOUND).body(responseBody);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleGiftCertificateNotFound(UserNotFoundException exception) {
+        log.warn("Cannot find user: {}", exception.getMessage());
+        ErrorResponse responseBody = ErrorResponse.of(exception.getMessage(), 40403);
+
+        return ResponseEntity.status(NOT_FOUND).body(responseBody);
+    }
+
+    @ExceptionHandler(OrderNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleGiftCertificateNotFound(OrderNotFoundException exception) {
+        log.warn("Cannot find order: {}", exception.getMessage());
+        ErrorResponse responseBody = ErrorResponse.of(exception.getMessage(), 40404);
+
+        return ResponseEntity.status(NOT_FOUND).body(responseBody);
+    }
+
+    @ExceptionHandler(OrderAlreadyExistsException.class)
+    public ResponseEntity<ErrorResponse> handleGiftCertificateNotFound(OrderAlreadyExistsException exception) {
+        log.warn("Order already exists: {}", exception.getMessage());
+        ErrorResponse responseBody = ErrorResponse.of(exception.getMessage(), 40904);
+
+        return ResponseEntity.status(CONFLICT).body(responseBody);
     }
 }

@@ -1,10 +1,10 @@
 package com.epam.esm.epammodule3.service;
 
-import com.epam.esm.epammodule3.model.entity.Tag;
+import com.epam.esm.epammodule3.model.entity.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
-public interface PageableTagService {
+public interface PageableUserService {
 
-    Page<Tag> findAll(Pageable pageable);
+    Page<User> findAll(Pageable pageable);
 }

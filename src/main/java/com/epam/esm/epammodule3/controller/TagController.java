@@ -5,9 +5,8 @@ import com.epam.esm.epammodule3.model.dto.TagDto;
 import com.epam.esm.epammodule3.model.dto.UpdateTagRequest;
 import com.epam.esm.epammodule3.model.entity.Tag;
 import com.epam.esm.epammodule3.service.TagService;
-import com.epam.esm.epammodule3.service.mapper.TagMapper;
-import com.epam.esm.epammodule3.util.GenerateInitialData;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
@@ -22,35 +21,29 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 public class TagController {
 
     private final TagService tagService;
-    private final TagMapper tagMapper;
-    private final GenerateInitialData generateInitialData;
+    private final ModelMapper modelMapper;
 
     @GetMapping("/{id}")
     public TagDto getTagById(@PathVariable Long id) {
-        // TODO remove after test
-        if (id.equals(111L)) {
-            generateInitialData.generate(10);
-        }
-
-        Tag tag = tagService.findById(id);
-        TagDto tagDto = tagMapper.toDto(tag);
+        Tag foundTag = tagService.findById(id);
+        TagDto tagDto = modelMapper.map(foundTag, TagDto.class);
 
         tagDto.add(linkTo(methodOn(TagController.class).getTagById(tagDto.getId())).withSelfRel());
         return tagDto;
     }
 
     @GetMapping
-    public Page<TagDto> getProducts(Pageable pageable) {
-        Page<Tag> tags = tagService.findAll(pageable);
+    public Page<TagDto> getTags(Pageable pageable) {
+        Page<Tag> foundTags = tagService.findAll(pageable);
 
-        return tags.map(tagMapper::toDto);
+        return foundTags.map(tag -> modelMapper.map(tag, TagDto.class));
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public TagDto addTag(@RequestBody CreateTagRequest createTagRequest) {
-        Tag tag = tagService.create(createTagRequest);
-        TagDto tagDto = tagMapper.toDto(tag);
+        Tag createdTag = tagService.create(createTagRequest);
+        TagDto tagDto = modelMapper.map(createdTag, TagDto.class);
 
         tagDto.add(linkTo(methodOn(TagController.class).getTagById(tagDto.getId())).withSelfRel());
         return tagDto;
@@ -59,7 +52,7 @@ public class TagController {
     @PatchMapping
     public TagDto updateTag(@RequestBody UpdateTagRequest updateTagRequest) {
         Tag updatedTag = tagService.update(updateTagRequest);
-        TagDto tagDto = tagMapper.toDto(updatedTag);
+        TagDto tagDto = modelMapper.map(updatedTag, TagDto.class);
 
         tagDto.add(linkTo(methodOn(TagController.class).getTagById(tagDto.getId())).withSelfRel());
         return tagDto;
@@ -70,5 +63,4 @@ public class TagController {
     public void deleteTagById(@PathVariable Long id) {
         tagService.delete(id);
     }
-
 }

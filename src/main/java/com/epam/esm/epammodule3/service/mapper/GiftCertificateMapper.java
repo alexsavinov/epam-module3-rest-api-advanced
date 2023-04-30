@@ -2,22 +2,25 @@ package com.epam.esm.epammodule3.service.mapper;
 
 import com.epam.esm.epammodule3.model.dto.CreateGiftCertificateRequest;
 import com.epam.esm.epammodule3.model.dto.GiftCertificateDto;
-import com.epam.esm.epammodule3.model.dto.GiftCertificateWithTagsDto;
 import com.epam.esm.epammodule3.model.dto.TagDto;
 import com.epam.esm.epammodule3.model.entity.GiftCertificate;
 import com.epam.esm.epammodule3.model.entity.Tag;
 import com.epam.esm.epammodule3.util.DateUtil;
-import lombok.RequiredArgsConstructor;
+import lombok.AllArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.Optional;
 
 @Component
-@RequiredArgsConstructor
+@AllArgsConstructor
 public class GiftCertificateMapper {
 
+    private final DateUtil dateUtil;
+    private final ModelMapper modelMapper;
 
-    public GiftCertificate toGiftCertificate(CreateGiftCertificateRequest createRequest) {
+    public GiftCertificate toCertificate(CreateGiftCertificateRequest createRequest) {
         GiftCertificate giftCertificate = GiftCertificate.builder()
                 .name(createRequest.getName())
                 .description(createRequest.getDescription())
@@ -25,10 +28,10 @@ public class GiftCertificateMapper {
                 .price(createRequest.getPrice())
                 .build();
 
-        if (createRequest.getTags() != null) {
-            TagMapper tagMapper = new TagMapper();
-            giftCertificate.setTags(createRequest.getTags().stream().map(tagMapper::toTag).toList());
-        }
+        Optional.ofNullable(createRequest.getTags()).ifPresent(tagsDto -> {
+            List<Tag> tags = tagsDto.stream().map(tag -> modelMapper.map(tag, Tag.class)).toList();
+            giftCertificate.setTags(tags);
+        });
 
         return giftCertificate;
     }
@@ -40,15 +43,20 @@ public class GiftCertificateMapper {
                 .description(certificate.getDescription())
                 .duration(certificate.getDuration())
                 .price(certificate.getPrice())
-                .createDate(DateUtil.toIso8601Format(certificate.getCreateDate()))
-                .lastUpdateDate(DateUtil.toIso8601Format(certificate.getLastUpdateDate()))
                 .build();
 
-        if (certificate.getTags() != null) {
-            TagMapper tagMapper = new TagMapper();
-            List<TagDto> tagsDto = certificate.getTags().stream().map(tagMapper::toDto).toList();
+        Optional.ofNullable(certificate.getCreateDate()).ifPresent(createDate ->
+            certificateDto.setCreateDate(dateUtil.toIso8601Format(createDate))
+        );
+
+        Optional.ofNullable(certificate.getLastUpdateDate()).ifPresent(lastUpdateDate ->
+            certificateDto.setCreateDate(dateUtil.toIso8601Format(lastUpdateDate))
+        );
+
+        Optional.ofNullable(certificate.getTags()).ifPresent(tags -> {
+            List<TagDto> tagsDto = tags.stream().map(tagDto -> modelMapper.map(tagDto, TagDto.class)).toList();
             certificateDto.setTags(tagsDto);
-        }
+        });
 
         return certificateDto;
     }

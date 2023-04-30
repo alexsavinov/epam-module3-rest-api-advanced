@@ -14,28 +14,27 @@ import java.util.List;
 @Table(name = "gift_certificate")
 public class GiftCertificate extends AuditableEntity {
 
+    public static final String ID = "id";
+    public static final String NAME = "name";
+    public static final String DESCRIPTION = "description";
+    public static final String PRICE = "price";
+    public static final String DURATION = "duration";
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = NAME, nullable = false)
     private String name;
 
-    @Column(name = "description")
+    @Column(name = DESCRIPTION)
     private String description;
 
-    @Column(name = "price")
+    @Column(name = PRICE)
     private Double price;
 
-    @Column(name = "duration")
+    @Column(name = DURATION)
     private Integer duration;
-
-//    @Column(updatable = false)
-//    @CreationTimestamp
-//    private LocalDateTime createDate;
-//
-//    @UpdateTimestamp
-//    private LocalDateTime lastUpdateDate;
 
     @ManyToMany(cascade = CascadeType.MERGE)
     @JoinTable(
