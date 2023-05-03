@@ -1,6 +1,6 @@
 package com.epam.esm.epammodule3.repository.specification;
 
-import com.epam.esm.epammodule3.model.dto.SearchGiftCertificateRequest;
+import com.epam.esm.epammodule3.model.dto.request.SearchGiftCertificateRequest;
 import com.epam.esm.epammodule3.model.entity.GiftCertificate;
 import com.epam.esm.epammodule3.model.entity.Tag;
 import jakarta.persistence.criteria.*;
@@ -11,10 +11,10 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static com.epam.esm.epammodule3.model.entity.GiftCertificate.DESCRIPTION;
 import static com.epam.esm.epammodule3.model.entity.GiftCertificate.NAME;
+import static java.util.Optional.ofNullable;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -27,15 +27,15 @@ public class GiftCertificateSpecification implements Specification<GiftCertifica
     public Predicate toPredicate(Root<GiftCertificate> root, CriteriaQuery<?> query, CriteriaBuilder builder) {
         List<Predicate> predicates = new ArrayList<>();
 
-        Optional.ofNullable(searchRequest.getName()).ifPresent(name ->
+        ofNullable(searchRequest.getName()).ifPresent(name ->
                 predicates.add(builder.like(root.get(NAME), getStringLike(name)))
         );
 
-        Optional.ofNullable(searchRequest.getDescription()).ifPresent(name ->
+        ofNullable(searchRequest.getDescription()).ifPresent(name ->
                 predicates.add(builder.like(root.get(DESCRIPTION), getStringLike(name)))
         );
 
-        Optional.ofNullable(searchRequest.getTags()).ifPresent(tags -> {
+        ofNullable(searchRequest.getTags()).ifPresent(tags -> {
             Join<GiftCertificate, Tag> certificateTags = root.join("tags");
             Expression<String> expression = certificateTags.get("name");
             predicates.add(expression.in(tags));

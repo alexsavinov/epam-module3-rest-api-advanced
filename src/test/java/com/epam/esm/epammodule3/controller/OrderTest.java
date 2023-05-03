@@ -4,6 +4,8 @@ import com.epam.esm.epammodule3.controller.advice.ApplicationControllerAdvice;
 import com.epam.esm.epammodule3.exception.OrderAlreadyExistsException;
 import com.epam.esm.epammodule3.exception.OrderNotFoundException;
 import com.epam.esm.epammodule3.model.dto.*;
+import com.epam.esm.epammodule3.model.dto.request.CreateOrderRequest;
+import com.epam.esm.epammodule3.model.dto.request.UpdateOrderRequest;
 import com.epam.esm.epammodule3.model.entity.GiftCertificate;
 import com.epam.esm.epammodule3.model.entity.Order;
 import com.epam.esm.epammodule3.model.entity.User;
@@ -28,8 +30,7 @@ import java.util.List;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @ExtendWith(MockitoExtension.class)
 class OrderTest {
@@ -272,6 +273,118 @@ class OrderTest {
         mockMvc.perform(requestBuilder).andExpect(status().isNoContent());
 
         verify(orderService).delete(ORDER_ID);
+        verifyNoMoreInteractions(orderService);
+    }
+
+    @Test
+    void getOneOrderForUser() throws Exception {
+        GiftCertificate certificate = GiftCertificate.builder()
+                .id(CERTIFICATE_ID)
+                .name("cert")
+                .build();
+        GiftCertificateDto certificateDtoRequest = GiftCertificateDto.builder()
+                .id(CERTIFICATE_ID)
+                .name("cert")
+                .build();
+
+        User user = new User(USER_ID, "User");
+        UserDto userDto = new UserDto(USER_ID, "User");
+
+        Order expectedOrder = Order.builder()
+                .id(ORDER_ID)
+                .price(10.2)
+                .user(user)
+                .giftCertificate(certificate)
+                .build();
+        OrderDto orderDto = OrderDto.builder()
+                .id(ORDER_ID)
+                .price(10.2)
+                .user(userDto)
+                .certificate(certificateDtoRequest)
+                .build();
+
+        when(orderService.findByOrderIdAndUserId(any(Long.class), any(Long.class))).thenReturn(expectedOrder);
+        when(orderMapper.toDto(any(Order.class))).thenReturn(orderDto);
+
+        mockMvc.perform(
+                        get("/orders/{orderId}/user", USER_ID)
+                                .param("userId", String.valueOf(USER_ID))
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(expectedOrder.getId().toString()))
+                .andExpect(jsonPath("$.price").value(expectedOrder.getPrice()))
+                .andExpect(jsonPath("$.user.id").value(expectedOrder.getUser().getId()))
+                .andExpect(jsonPath("$.certificate.id").value(expectedOrder.getGiftCertificate().getId()));
+
+        verify(orderService).findByOrderIdAndUserId(USER_ID, ORDER_ID);
+        verify(orderMapper).toDto(expectedOrder);
+        verifyNoMoreInteractions(orderService, orderMapper);
+    }
+
+    @Test
+    void getAllOrdersForUser() throws Exception {
+        GiftCertificate certificate = GiftCertificate.builder()
+                .id(CERTIFICATE_ID)
+                .name("cert")
+                .build();
+        GiftCertificateDto certificateDtoRequest = GiftCertificateDto.builder()
+                .id(CERTIFICATE_ID)
+                .name("cert")
+                .build();
+
+        User user = new User(USER_ID, "User");
+        UserDto userDto = new UserDto(USER_ID, "User");
+
+        Order expectedOrder = Order.builder()
+                .id(ORDER_ID)
+                .price(10.2)
+                .user(user)
+                .giftCertificate(certificate)
+                .build();
+        OrderDto orderDto = OrderDto.builder()
+                .id(ORDER_ID)
+                .price(10.2)
+                .user(userDto)
+                .certificate(certificateDtoRequest)
+                .build();
+
+
+        List<Order> expectedOrders = List.of(expectedOrder);
+
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<Order> pageableExpectedOrders = new PageImpl(expectedOrders, pageable, expectedOrders.size());
+
+        when(orderService.findAllByUserId(any(Long.class), any(Pageable.class))).thenReturn(pageableExpectedOrders);
+        when(orderMapper.toDto(any(Order.class))).thenReturn(orderDto);
+
+        mockMvc.perform(
+                        get("/orders/user")
+                                .param("userId", String.valueOf(USER_ID))
+                                .param("page", "0")
+                                .param("size", "5")
+
+                )
+                .andExpect(status().isOk());
+
+        verify(orderService).findAllByUserId(USER_ID, pageable);
+        verify(orderMapper).toDto(expectedOrder);
+        verifyNoMoreInteractions(orderService, orderMapper);
+    }
+
+    @Test
+    void getHighestCost() throws Exception {
+        HighestCostDto expectedCostDto = new HighestCostDto(100.11);
+
+        when(orderService.getHighestCost(any(Long.class))).thenReturn(expectedCostDto.getHighestCost());
+
+        mockMvc.perform(
+                        get("/orders/cost")
+                                .param("userId", String.valueOf(USER_ID))
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.highestCost").value(expectedCostDto.getHighestCost().toString()));
+
+        verify(orderService).getHighestCost(USER_ID);
         verifyNoMoreInteractions(orderService);
     }
 }

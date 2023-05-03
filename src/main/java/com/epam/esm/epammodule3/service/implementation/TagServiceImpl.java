@@ -1,12 +1,16 @@
-package com.epam.esm.epammodule3.service;
+package com.epam.esm.epammodule3.service.implementation;
 
 
 import com.epam.esm.epammodule3.exception.TagAlreadyExistsException;
 import com.epam.esm.epammodule3.exception.TagNotFoundException;
-import com.epam.esm.epammodule3.model.dto.CreateTagRequest;
-import com.epam.esm.epammodule3.model.dto.UpdateTagRequest;
+import com.epam.esm.epammodule3.model.dto.request.CreateTagRequest;
+import com.epam.esm.epammodule3.model.dto.request.UpdateTagRequest;
 import com.epam.esm.epammodule3.model.entity.Tag;
 import com.epam.esm.epammodule3.repository.TagRepository;
+import com.epam.esm.epammodule3.service.TagService;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.TypedQuery;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -25,6 +29,8 @@ public class TagServiceImpl implements TagService {
 
     private final TagRepository tagRepository;
     private final ModelMapper modelMapper;
+//    @PersistenceContext
+    public final EntityManager entityManager;
 
     @Override
     public Tag findById(Long id) {
@@ -132,9 +138,21 @@ public class TagServiceImpl implements TagService {
     public Optional<Tag> getTopUsedTag(Long userId) {
         log.debug("Looking for top used tag by user's id {}", userId);
 
-        Optional<Tag> foundTag = tagRepository.getTopUsedTag(userId);
+        /* one way - native query*/
+//        Optional<Tag> foundTag = tagRepository.getTopUsedTag(userId);
+
+        /* another way - HQL query */
+        String query = "select t from Tag t where t in " +
+                "(select c.tags from GiftCertificate c " +
+                "join Order o on c.id = o.giftCertificate.id where o.user.id=:id) " +
+                "group by t.id order by count(t.id) desc LIMIT 1";
+        TypedQuery<Tag> typedQuery = entityManager.createQuery(query, Tag.class);
+
+        typedQuery.setParameter("id", userId);
+
+        Tag foundTag = typedQuery.getSingleResult();
 
         log.info("Found top used tag by user's id name {}", userId);
-        return foundTag;
+        return Optional.of(foundTag);
     }
 }

@@ -1,6 +1,6 @@
 package com.epam.esm.epammodule3.service;
 
-import com.epam.esm.epammodule3.model.dto.SearchGiftCertificateRequest;
+import com.epam.esm.epammodule3.model.dto.request.SearchGiftCertificateRequest;
 import com.epam.esm.epammodule3.model.entity.GiftCertificate;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

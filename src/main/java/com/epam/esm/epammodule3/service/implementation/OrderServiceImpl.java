@@ -1,13 +1,16 @@
-package com.epam.esm.epammodule3.service;
+package com.epam.esm.epammodule3.service.implementation;
 
 import com.epam.esm.epammodule3.exception.OrderAlreadyExistsException;
 import com.epam.esm.epammodule3.exception.OrderNotFoundException;
-import com.epam.esm.epammodule3.model.dto.CreateOrderRequest;
-import com.epam.esm.epammodule3.model.dto.UpdateOrderRequest;
+import com.epam.esm.epammodule3.model.dto.request.CreateOrderRequest;
+import com.epam.esm.epammodule3.model.dto.request.UpdateOrderRequest;
 import com.epam.esm.epammodule3.model.entity.GiftCertificate;
 import com.epam.esm.epammodule3.model.entity.Order;
 import com.epam.esm.epammodule3.model.entity.User;
 import com.epam.esm.epammodule3.repository.*;
+import com.epam.esm.epammodule3.service.GiftCertificateService;
+import com.epam.esm.epammodule3.service.OrderService;
+import com.epam.esm.epammodule3.service.UserService;
 import com.epam.esm.epammodule3.service.mapper.OrderMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service
@@ -78,14 +83,14 @@ public class OrderServiceImpl implements OrderService {
 
         Order foundOrder = findById(updateOrderRequest.getId());
 
-        Optional.ofNullable(updateOrderRequest.getPrice()).ifPresent(foundOrder::setPrice);
+        ofNullable(updateOrderRequest.getPrice()).ifPresent(foundOrder::setPrice);
 
-        Optional.ofNullable(updateOrderRequest.getUser()).ifPresent(userDto -> {
+        ofNullable(updateOrderRequest.getUser()).ifPresent(userDto -> {
             User foundUser = userService.findById(userDto.getId());
             foundOrder.setUser(foundUser);
         });
 
-        Optional.ofNullable(updateOrderRequest.getCertificate()).ifPresent(certificateDto -> {
+        ofNullable(updateOrderRequest.getCertificate()).ifPresent(certificateDto -> {
             GiftCertificate foundCertificate = certificateService.findById(certificateDto.getId());
             foundOrder.setGiftCertificate(foundCertificate);
         });

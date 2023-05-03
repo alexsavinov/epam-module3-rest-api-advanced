@@ -3,9 +3,9 @@ package com.epam.esm.epammodule3.controller;
 import com.epam.esm.epammodule3.controller.advice.ApplicationControllerAdvice;
 import com.epam.esm.epammodule3.exception.TagAlreadyExistsException;
 import com.epam.esm.epammodule3.exception.TagNotFoundException;
-import com.epam.esm.epammodule3.model.dto.CreateTagRequest;
+import com.epam.esm.epammodule3.model.dto.request.CreateTagRequest;
 import com.epam.esm.epammodule3.model.dto.TagDto;
-import com.epam.esm.epammodule3.model.dto.UpdateTagRequest;
+import com.epam.esm.epammodule3.model.dto.request.UpdateTagRequest;
 import com.epam.esm.epammodule3.model.entity.Tag;
 import com.epam.esm.epammodule3.service.TagService;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -24,6 +24,7 @@ import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -35,6 +36,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class TagControllerTest {
 
     private static final Long TAG_ID = 1L;
+    private static final Long USER_ID = 1L;
     @InjectMocks
     private TagController subject;
     @Mock
@@ -191,5 +193,26 @@ class TagControllerTest {
 
         verify(tagService).delete(TAG_ID);
         verifyNoMoreInteractions(tagService);
+    }
+
+    @Test
+    void getTopUsedTag() throws Exception {
+        Tag expectedTag = new Tag();
+        TagDto tagDto = new TagDto(TAG_ID, "Tag");
+
+        when(tagService.getTopUsedTag(any(Long.class))).thenReturn(Optional.of(expectedTag));
+        when(modelMapper.map(any(Tag.class), any(Class.class))).thenReturn(tagDto);
+
+        mockMvc.perform(
+                        get("/tags/top-used-tag")
+                                .param("userId", String.valueOf(USER_ID))
+                )
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(tagDto.getId().toString()))
+                .andExpect(jsonPath("$.name").value(tagDto.getName()));
+
+        verify(tagService).getTopUsedTag(TAG_ID);
+        verify(modelMapper).map(expectedTag, TagDto.class);
+        verifyNoMoreInteractions(tagService, modelMapper);
     }
 }

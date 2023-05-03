@@ -1,14 +1,16 @@
-package com.epam.esm.epammodule3.service;
+package com.epam.esm.epammodule3.service.implementation;
 
 import com.epam.esm.epammodule3.exception.GiftCertificateNotFoundException;
-import com.epam.esm.epammodule3.model.dto.CreateGiftCertificateRequest;
-import com.epam.esm.epammodule3.model.dto.CreateTagRequest;
-import com.epam.esm.epammodule3.model.dto.SearchGiftCertificateRequest;
-import com.epam.esm.epammodule3.model.dto.UpdateGiftCertificateRequest;
+import com.epam.esm.epammodule3.model.dto.request.CreateGiftCertificateRequest;
+import com.epam.esm.epammodule3.model.dto.request.CreateTagRequest;
+import com.epam.esm.epammodule3.model.dto.request.SearchGiftCertificateRequest;
+import com.epam.esm.epammodule3.model.dto.request.UpdateGiftCertificateRequest;
 import com.epam.esm.epammodule3.model.entity.GiftCertificate;
 import com.epam.esm.epammodule3.model.entity.Tag;
 import com.epam.esm.epammodule3.repository.*;
 import com.epam.esm.epammodule3.repository.specification.GiftCertificateSpecification;
+import com.epam.esm.epammodule3.service.GiftCertificateService;
+import com.epam.esm.epammodule3.service.TagService;
 import com.epam.esm.epammodule3.service.mapper.GiftCertificateMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +21,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
 
 @Slf4j
 @Service
@@ -65,7 +68,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         GiftCertificate certificate = certificateMapper.toCertificate(createRequest);
         List<Tag> foundTags = certificate.getTags();
 
-        Optional.ofNullable(foundTags).ifPresent(certificateTags ->
+        ofNullable(foundTags).ifPresent(certificateTags ->
                 certificateTags.forEach(tag -> {
                     Tag createdTag = tagService.createTagWithCheck(new CreateTagRequest(tag.getName()));
                     tag.setId(createdTag.getId());
@@ -84,10 +87,10 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
 
         GiftCertificate foundCertificate = findById(updateRequest.getId());
 
-        Optional.ofNullable(updateRequest.getName()).ifPresent(foundCertificate::setName);
-        Optional.ofNullable(updateRequest.getDescription()).ifPresent(foundCertificate::setDescription);
-        Optional.ofNullable(updateRequest.getPrice()).ifPresent(foundCertificate::setPrice);
-        Optional.ofNullable(updateRequest.getDuration()).ifPresent(foundCertificate::setDuration);
+        ofNullable(updateRequest.getName()).ifPresent(foundCertificate::setName);
+        ofNullable(updateRequest.getDescription()).ifPresent(foundCertificate::setDescription);
+        ofNullable(updateRequest.getPrice()).ifPresent(foundCertificate::setPrice);
+        ofNullable(updateRequest.getDuration()).ifPresent(foundCertificate::setDuration);
 
         GiftCertificate updatedCertificate = certificateRepository.save(foundCertificate);
 

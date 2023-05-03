@@ -1,14 +1,16 @@
 package com.epam.esm.epammodule3.service;
 
 import com.epam.esm.epammodule3.exception.GiftCertificateNotFoundException;
-import com.epam.esm.epammodule3.model.dto.CreateGiftCertificateRequest;
-import com.epam.esm.epammodule3.model.dto.CreateTagRequest;
-import com.epam.esm.epammodule3.model.dto.SearchGiftCertificateRequest;
-import com.epam.esm.epammodule3.model.dto.UpdateGiftCertificateRequest;
+import com.epam.esm.epammodule3.model.dto.request.CreateGiftCertificateRequest;
+import com.epam.esm.epammodule3.model.dto.request.CreateTagRequest;
+import com.epam.esm.epammodule3.model.dto.request.SearchGiftCertificateRequest;
+import com.epam.esm.epammodule3.model.dto.request.UpdateGiftCertificateRequest;
 import com.epam.esm.epammodule3.model.entity.GiftCertificate;
 import com.epam.esm.epammodule3.model.entity.Tag;
 import com.epam.esm.epammodule3.repository.GiftCertificateRepository;
 import com.epam.esm.epammodule3.repository.PageableGiftCertificateRepository;
+import com.epam.esm.epammodule3.service.implementation.GiftCertificateServiceImpl;
+import com.epam.esm.epammodule3.service.implementation.TagServiceImpl;
 import com.epam.esm.epammodule3.service.mapper.GiftCertificateMapper;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

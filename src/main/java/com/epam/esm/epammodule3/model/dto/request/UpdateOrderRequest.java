@@ -1,5 +1,7 @@
-package com.epam.esm.epammodule3.model.dto;
+package com.epam.esm.epammodule3.model.dto.request;
 
+import com.epam.esm.epammodule3.model.dto.GiftCertificateDto;
+import com.epam.esm.epammodule3.model.dto.UserDto;
 import lombok.Getter;
 
 @Getter

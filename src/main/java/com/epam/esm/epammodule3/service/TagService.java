@@ -1,7 +1,7 @@
 package com.epam.esm.epammodule3.service;
 
-import com.epam.esm.epammodule3.model.dto.CreateTagRequest;
-import com.epam.esm.epammodule3.model.dto.UpdateTagRequest;
+import com.epam.esm.epammodule3.model.dto.request.CreateTagRequest;
+import com.epam.esm.epammodule3.model.dto.request.UpdateTagRequest;
 import com.epam.esm.epammodule3.model.entity.Tag;
 
 import java.util.Optional;

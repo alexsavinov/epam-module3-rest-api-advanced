@@ -1,6 +1,6 @@
 package com.epam.esm.epammodule3.service.mapper;
 
-import com.epam.esm.epammodule3.model.dto.CreateOrderRequest;
+import com.epam.esm.epammodule3.model.dto.request.CreateOrderRequest;
 import com.epam.esm.epammodule3.model.dto.OrderDto;
 import com.epam.esm.epammodule3.model.dto.UserDto;
 import com.epam.esm.epammodule3.model.entity.GiftCertificate;

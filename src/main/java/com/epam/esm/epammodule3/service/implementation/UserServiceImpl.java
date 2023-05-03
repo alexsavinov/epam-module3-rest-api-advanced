@@ -1,9 +1,10 @@
-package com.epam.esm.epammodule3.service;
+package com.epam.esm.epammodule3.service.implementation;
 
 import com.epam.esm.epammodule3.exception.UserNotFoundException;
 import com.epam.esm.epammodule3.model.entity.User;
 import com.epam.esm.epammodule3.repository.PageableUserRepository;
 import com.epam.esm.epammodule3.repository.UserRepository;
+import com.epam.esm.epammodule3.service.UserService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;

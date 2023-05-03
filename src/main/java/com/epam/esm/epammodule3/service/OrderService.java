@@ -1,7 +1,7 @@
 package com.epam.esm.epammodule3.service;
 
-import com.epam.esm.epammodule3.model.dto.CreateOrderRequest;
-import com.epam.esm.epammodule3.model.dto.UpdateOrderRequest;
+import com.epam.esm.epammodule3.model.dto.request.CreateOrderRequest;
+import com.epam.esm.epammodule3.model.dto.request.UpdateOrderRequest;
 import com.epam.esm.epammodule3.model.entity.Order;
 import org.springframework.transaction.annotation.Transactional;
 

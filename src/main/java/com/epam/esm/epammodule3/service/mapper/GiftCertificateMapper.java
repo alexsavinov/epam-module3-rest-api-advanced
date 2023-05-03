@@ -1,6 +1,6 @@
 package com.epam.esm.epammodule3.service.mapper;
 
-import com.epam.esm.epammodule3.model.dto.CreateGiftCertificateRequest;
+import com.epam.esm.epammodule3.model.dto.request.CreateGiftCertificateRequest;
 import com.epam.esm.epammodule3.model.dto.GiftCertificateDto;
 import com.epam.esm.epammodule3.model.dto.TagDto;
 import com.epam.esm.epammodule3.model.entity.GiftCertificate;
@@ -11,7 +11,8 @@ import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
-import java.util.Optional;
+
+import static java.util.Optional.ofNullable;
 
 @Component
 @AllArgsConstructor
@@ -28,7 +29,7 @@ public class GiftCertificateMapper {
                 .price(createRequest.getPrice())
                 .build();
 
-        Optional.ofNullable(createRequest.getTags()).ifPresent(tagsDto -> {
+        ofNullable(createRequest.getTags()).ifPresent(tagsDto -> {
             List<Tag> tags = tagsDto.stream().map(tag -> modelMapper.map(tag, Tag.class)).toList();
             giftCertificate.setTags(tags);
         });
@@ -45,15 +46,15 @@ public class GiftCertificateMapper {
                 .price(certificate.getPrice())
                 .build();
 
-        Optional.ofNullable(certificate.getCreateDate()).ifPresent(createDate ->
+        ofNullable(certificate.getCreateDate()).ifPresent(createDate ->
             certificateDto.setCreateDate(dateUtil.toIso8601Format(createDate))
         );
 
-        Optional.ofNullable(certificate.getLastUpdateDate()).ifPresent(lastUpdateDate ->
+        ofNullable(certificate.getLastUpdateDate()).ifPresent(lastUpdateDate ->
             certificateDto.setCreateDate(dateUtil.toIso8601Format(lastUpdateDate))
         );
 
-        Optional.ofNullable(certificate.getTags()).ifPresent(tags -> {
+        ofNullable(certificate.getTags()).ifPresent(tags -> {
             List<TagDto> tagsDto = tags.stream().map(tagDto -> modelMapper.map(tagDto, TagDto.class)).toList();
             certificateDto.setTags(tagsDto);
         });

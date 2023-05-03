@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static java.util.Optional.ofNullable;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -82,7 +84,7 @@ public class GenerateInitialDataImpl {
         List<Tag> tags = new ArrayList<>();
 
         tags.add(tag);
-        Optional.ofNullable(previousTag).ifPresent(tags::add);
+        ofNullable(previousTag).ifPresent(tags::add);
 
         cert.setTags(tags);
         return cert;

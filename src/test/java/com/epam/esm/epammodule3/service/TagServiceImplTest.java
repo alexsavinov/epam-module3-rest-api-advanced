@@ -2,10 +2,16 @@ package com.epam.esm.epammodule3.service;
 
 import com.epam.esm.epammodule3.exception.TagAlreadyExistsException;
 import com.epam.esm.epammodule3.exception.TagNotFoundException;
-import com.epam.esm.epammodule3.model.dto.CreateTagRequest;
-import com.epam.esm.epammodule3.model.dto.UpdateTagRequest;
+import com.epam.esm.epammodule3.model.dto.request.CreateTagRequest;
+import com.epam.esm.epammodule3.model.dto.request.UpdateTagRequest;
 import com.epam.esm.epammodule3.model.entity.Tag;
 import com.epam.esm.epammodule3.repository.TagRepository;
+import com.epam.esm.epammodule3.service.implementation.TagServiceImpl;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.EntityManagerFactory;
+import jakarta.persistence.Persistence;
+import jakarta.persistence.TypedQuery;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -33,6 +39,10 @@ class TagServiceImplTest {
     private TagRepository tagRepository;
     @Mock
     private ModelMapper modelMapper;
+    @Mock
+    private EntityManager entityManager;
+    @Mock
+    private TypedQuery<Tag> typedQuery;
     @Mock
     private CreateTagRequest createRequest;
     @Mock
@@ -217,6 +227,20 @@ class TagServiceImplTest {
     void getTopUsedTag() {
         Tag expectedTag = Tag.builder().id(TAG_ID).name("myTag").build();
 
+        when(entityManager.createQuery(anyString(), any(Class.class))).thenReturn(typedQuery);
+        when(typedQuery.getSingleResult()).thenReturn(expectedTag);
+
+        Optional<Tag> actualTag = subject.getTopUsedTag(TAG_ID);
+
+        assertThat(actualTag).isEqualTo(Optional.of(expectedTag));
+    }
+
+    @Test
+    @Disabled
+    void getTopUsedTag_withRepository() {
+        Tag expectedTag = Tag.builder().id(TAG_ID).name("myTag").build();
+
+        when(entityManager.createQuery(any(String.class))).thenReturn(typedQuery);
         when(tagRepository.getTopUsedTag(any(Long.class))).thenReturn(Optional.of(expectedTag));
 
         Optional<Tag> actualTag = subject.getTopUsedTag(TAG_ID);

@@ -4,6 +4,7 @@ import com.epam.esm.epammodule3.exception.UserNotFoundException;
 import com.epam.esm.epammodule3.model.entity.User;
 import com.epam.esm.epammodule3.repository.PageableUserRepository;
 import com.epam.esm.epammodule3.repository.UserRepository;
+import com.epam.esm.epammodule3.service.implementation.UserServiceImpl;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

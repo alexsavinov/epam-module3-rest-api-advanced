@@ -1,6 +1,9 @@
 package com.epam.esm.epammodule3.controller;
 
 import com.epam.esm.epammodule3.model.dto.*;
+import com.epam.esm.epammodule3.model.dto.request.CreateGiftCertificateRequest;
+import com.epam.esm.epammodule3.model.dto.request.SearchGiftCertificateRequest;
+import com.epam.esm.epammodule3.model.dto.request.UpdateGiftCertificateRequest;
 import com.epam.esm.epammodule3.model.entity.GiftCertificate;
 import com.epam.esm.epammodule3.service.GiftCertificateService;
 import com.epam.esm.epammodule3.service.mapper.GiftCertificateMapper;

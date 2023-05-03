@@ -1,4 +1,4 @@
-package com.epam.esm.epammodule3.model.dto;
+package com.epam.esm.epammodule3.model.dto.request;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
